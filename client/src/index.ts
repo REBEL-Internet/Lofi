@@ -152,13 +152,12 @@ async function generateAndDownloadBatch() {
   await player.playTrack(player.playlist.length - 1)
   player.onPlayingStateChange = async () => {
     if (player.isPlaying) {
+      player.recorderFileName = player.currentTrack.title.replace('#', '');
       player.gain.context.destination.mute = true;
       // delay to remove silence and noises at the beginning
       await setTimeout(() => player.startRecording(), downloadState.recordingDelayMs);
       return;
     }
-
-    player.recorderFileName = player.currentTrack.title.replace('#', '');
     player.pauseRecording()
     downloadState.downloadedCnt++;
     downloadedCntSpan.innerText = downloadState.downloadedCnt.toString();
