@@ -150,7 +150,7 @@ $panel-border-radius: 6px;
     }
 
     button::before {
-      content: "Start downloading"
+      content: "Download"
     }
   }
   &.recording {
@@ -174,7 +174,7 @@ $panel-border-radius: 6px;
     }
 
     button::before {
-      content: "Stop downloading"
+      content: "Stop"
     }
   }
 
