@@ -145,7 +145,10 @@ const setRecordBatch = async () => {
 }
 
 async function generateAndDownloadBatch() {
-  console.log(player.playlist.length)
+  if (!player.playlist.length) {
+    await generateNewTrack();
+  }
+  
   await player.playTrack(player.playlist.length - 1)
   player.onPlayingStateChange = async () => {
     if (player.isPlaying) {
