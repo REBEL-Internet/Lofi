@@ -1,9 +1,9 @@
 import Sortable from 'sortablejs';
-import Player, { RepeatMode } from './player';
+import Player, {RepeatMode} from './player';
 import Producer from './producer';
-import { DEFAULT_OUTPUTPARAMS, HIDDEN_SIZE, OutputParams } from './params';
-import { decompress, randn } from './helper';
-import { decode } from './api';
+import {DEFAULT_OUTPUTPARAMS, HIDDEN_SIZE, OutputParams} from './params';
+import {decompress, randn} from './helper';
+import {decode} from './api';
 
 const player = new Player();
 
@@ -96,6 +96,87 @@ export function refreshLatentSpace() {
   });
 }
 refreshButton.addEventListener('click', refreshLatentSpace);
+
+// generate and download batch button
+const generateBatchButton = document.getElementById('generate-and-download-many-button') as HTMLButtonElement;
+const recordingDelayInput = document.getElementById('recording-start-delay') as HTMLInputElement;
+const downloadCntInput = document.getElementById('limit-download-count') as HTMLInputElement;
+const recordingPanel = document.getElementById('recording-batch-panel') as HTMLDivElement;
+const downloadCntSpan = document.getElementById('download-cnt') as HTMLSpanElement
+const downloadedCntSpan = document.getElementById('downloaded-cnt') as HTMLSpanElement
+
+const downloadState = {
+  isActive: false,
+  downloadCnt: 0,
+  downloadedCnt: 0,
+  recordingDelayMs: 0
+}
+
+const setRecordBatch = async () => {
+  if (!downloadState.isActive) {
+    const cnt = downloadCntInput.valueAsNumber;
+    if (isNaN(cnt) || cnt < 1 || cnt > 10000) {
+      alert('Wrong quantity')
+      return;
+    }
+    const delayMs = recordingDelayInput.valueAsNumber;
+    if (isNaN(delayMs) || delayMs < 0 || delayMs > 10000) {
+      alert('Wrong delay')
+      return;
+    }
+
+    downloadState.recordingDelayMs = delayMs
+    downloadState.downloadCnt = cnt
+    downloadState.downloadedCnt = 0;
+    downloadState.isActive = true;
+    downloadCntSpan.innerText = downloadState.downloadCnt.toString();
+    downloadedCntSpan.innerText = downloadState.downloadedCnt.toString();
+    recordingPanel.classList.remove('paused')
+    recordingPanel.classList.add('recording')
+    await generateAndDownloadBatch()
+  } else {
+    player.onPlayingStateChange = () => {};
+    downloadState.isActive = false;
+    player.gain.context.destination.mute = false;
+    recordingPanel.classList.remove('recording')
+    recordingPanel.classList.add('paused')
+    player.stop()
+  }
+}
+
+async function generateAndDownloadBatch() {
+  console.log(player.playlist.length)
+  await player.playTrack(player.playlist.length - 1)
+  player.onPlayingStateChange = async () => {
+    if (player.isPlaying) {
+      player.gain.context.destination.mute = true;
+      // delay to remove silence and noises at the beginning
+      await setTimeout(() => player.startRecording(), downloadState.recordingDelayMs);
+      return;
+    }
+
+    player.recorderFileName = player.currentTrack.title.replace('#', '');
+    player.pauseRecording()
+    downloadState.downloadedCnt++;
+    downloadedCntSpan.innerText = downloadState.downloadedCnt.toString();
+    player.onPlayingStateChange = () => {};
+    refreshLatentSpace();
+    await generateNewTrack();
+    downloadState.isActive = downloadState.downloadedCnt < downloadState.downloadCnt;
+    if (downloadState.isActive) {
+      setTimeout(async() => await generateAndDownloadBatch(), 1000)
+    } else {
+      player.gain.context.destination.mute = false;
+      recordingPanel.classList.remove('recording')
+      recordingPanel.classList.add('paused')
+    }
+  }
+
+  // setTimeout(() => player.stop(), 15000)
+}
+
+generateBatchButton.addEventListener('click', setRecordBatch);
+
 
 // Generate button
 const generateButton = document.getElementById('generate-button') as HTMLButtonElement;
@@ -324,7 +405,7 @@ player.onPlayingStateChange = updatePlayingState;
 player.onLoadingStateChange = updateTrackClasses;
 playButton.addEventListener('click', async () => {
   if (player.playlist.length === 0) return;
-  
+
   if (player.isPlaying) {
     player.pause();
   } else {
@@ -340,6 +421,7 @@ playPreviousButton.addEventListener('click', async () => {
 playNextButton.addEventListener('click', async () => {
   player.playNext();
 });
+
 repeatButton.addEventListener('click', async () => {
   switch (player.repeat) {
     case RepeatMode.ALL: {
@@ -371,6 +453,7 @@ shuffleButton.addEventListener('click', async () => {
   shuffleButton.classList.toggle('active', player.shuffle);
   repeatButton.disabled = player.shuffle;
 });
+
 volumeButton.addEventListener('click', async () => {
   if (player.gain) {
     player.gain.gain.value = volumeBar.valueAsNumber;

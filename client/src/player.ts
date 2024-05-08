@@ -41,6 +41,8 @@ class Player {
    /** Recorder */
    private _recorder: Tone.Recorder;
 
+   public recorderFileName = `lofi-record`;
+
    async downloadRecording() {
      if (this._recorder) {
        const recording = await this._recorder.stop();
@@ -48,7 +50,7 @@ class Player {
        if (recording?.size > 0) {
          const url = URL.createObjectURL(recording);
          const anchor = document.createElement('a');
-         anchor.download = `lofi-record.${type}`;
+         anchor.download = `${this.recorderFileName}.${type}`;
          anchor.href = url;
          anchor.click();
        }
@@ -197,7 +199,6 @@ class Player {
       return;
     }
     this.isLoading = true;
-
     this.gain = new Tone.Gain();
     this.isPlaying = true;
     this.setAudioWebApiMetadata();

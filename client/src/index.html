@@ -15,6 +15,26 @@
     <div id="intro-text" class="panel">
       <span>Our machine learning model has learned to represent a lofi track as a vector of 100 features. Each slider in the Latent Space panel corresponds to one such feature. Slide them around and generate new tracks!</span>
     </div>
+    <div id="recording-batch-panel" class="paused">
+      <div>
+        <label for="limit-download-count">Quantity (1 - 10000):</label>
+        <span class="tooltip">
+          <input type="number" min="1" max="10000" step="1" value="100" id="limit-download-count"><span class="tooltiptext">Number songs to download.</span>
+        </span>
+      </div>
+      <div>
+        <label for="recording-start-delay">Delay, ms:</label>
+        <span class="tooltip">
+          <input type="number" min="0" max="10000" step="1" value="3000" id="recording-start-delay" data-help="dasdsadsadasd">
+          <span class="tooltiptext">Depending on performance delay between start recording and actual playing song can happen. As result, it leads to silence and/or noise at the start of the recorded song. Use this input to set delay before recording start to eliminate it. You should pick exact value up manually, because it depends on your environment.</span>
+        </span>
+
+      </div>
+      <button id="generate-and-download-many-button" class="flat"></button>
+      <div id="counters">
+        Progress: <span id="downloaded-cnt">0</span>/<span id="download-cnt">0</span><div class="notification"></div>
+      </div>
+    </div>
     <div id="main">
       <div id="player-panel">
         <div id="current-track" class="panel">

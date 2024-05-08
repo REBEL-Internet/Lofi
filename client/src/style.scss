@@ -80,6 +80,32 @@ $panel-border-radius: 6px;
   }
 }
 
+.tooltip {
+  position: relative;
+  display: inline-block;
+  border-bottom: 1px dotted black;
+}
+
+.tooltip .tooltiptext {
+  display: flex;
+  height: auto;
+  visibility: hidden;
+  width: 250px;
+  background-color: black;
+  color: #fff;
+  text-align: center;
+  border-radius: 6px;
+  padding: 5px 0;
+
+  /* Position the tooltip */
+  position: absolute;
+  z-index: 1;
+}
+
+.tooltip:hover .tooltiptext {
+  visibility: visible;
+}
+
 #main {
   display: flex;
   flex-direction: row;
@@ -98,6 +124,71 @@ $panel-border-radius: 6px;
     font-weight: 500;
     user-select: none;
     padding: 8px;
+  }
+}
+
+#recording-batch-panel {
+  width: 90%;
+  display: flex;
+  padding-left: 5%;
+  padding-right: 5%;
+  flex-direction: row;
+  background: $ui-background;
+  align-items: center;
+
+  .notification {
+    margin-left: 5px;
+    margin-right: 5px;
+    display: inline-block;
+    text-transform: capitalize;
+  }
+
+  &.paused {
+
+    .notification::after {
+      content: 'DONE....'
+    }
+
+    button::before {
+      content: "Start downloading"
+    }
+  }
+  &.recording {
+
+    .notification::after {
+      @keyframes animate{
+        0% {
+          opacity: 0;
+        }
+        50% {
+          opacity: 0.5;
+        }
+        100% {
+          opacity: 0;
+        }
+      }
+      color: #00ff00;
+      font-weight: bold;
+      animation: animate 1.5s linear infinite;
+      content: '...DOWNLOAING...'
+    }
+
+    button::before {
+      content: "Stop downloading"
+    }
+  }
+
+  #counters {
+    margin-left: 5px;
+    margin-right: 5px;
+  }
+
+  input {
+    margin-left: 10px;
+    margin-right: 10px;
+    height: 20px;
+    max-width: 70px;
+    background: $ui-background;
   }
 }
 
